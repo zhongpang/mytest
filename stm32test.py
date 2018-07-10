@@ -1,31 +1,41 @@
 #coding:utf-8
 
 import time
-import RPi.GPIO as GPIO
+import struct
 import serial
 
-#set control
-channel =18
- 
-GPIO.setmode(GPIO.BCM)
-time.sleep(1)
-GPIO.setup(channel, GPIO.OUT)
-time.sleep(0.02)
-GPIO.output(channel, GPIO.HIGH)
+ser = serial.Serial('/dev/ttyAMA0', 9600, timeout=1)
+print ser.port
+print ser.baudrate
 
-ser = serial.Serial("/dev/ttyAMA0", 9600)
+#time.sleep(10)    
+
 data = []
 try:
-    #while True:
-    print("serial test start ...")
-    datalen = ser.inWaiting()
-    if datalen !=0:
-        #Read
-        data = ser.read(datalen)
-        print("received:", data)
+    while True:
+        print 'serial test start ...' 
+        datalen = ser.inWaiting()
+        print 'datalen:', datalen 
+        if datalen !=0:
+            #Read
+            data = ser.read(datalen)
+            ser.flushInput()    
+            #print 'received:', data 
+            bit_head = data[0]
+            bit_funcd= data[1]
+            bit_len  = data[2]
+            bit_temp_H = data[13]
+            bit_temp_L = data[14]
+            temperature = 0.0
+            #temperature = -46.84 + 175.72 * (bit_temp_H*256+bit_temp_L)/(2^16)
+            #temperature = bit_temp_H.hex()*256+bit_temp_L.hex()
+            print 'datalen:', struct.unpack('<L', bytes(data[2:3]))
+
+        time.sleep(1)    
 
 except KeyboardInterrupt:
     if ser != None:
         ser.close()
-    GPIO.cleanup()
  
+if ser != None:
+    ser.close()
