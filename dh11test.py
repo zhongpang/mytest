@@ -1,139 +1,119 @@
-
+#coding:utf-8
 import RPi.GPIO as GPIO
 
 import time
 
  
-
-channel =2 
-
-data = []
-
-j = 0
-
- 
-
+channel =4 
 GPIO.setmode(GPIO.BCM)
-
- 
 
 time.sleep(1)
 
- 
 
-GPIO.setup(channel, GPIO.OUT)
+count = 0
+while count < 10:
+   #count = count + 1
 
-GPIO.output(channel, GPIO.LOW)
+    GPIO.setup(channel, GPIO.OUT)
+    GPIO.output(channel, GPIO.LOW)
+    time.sleep(0.02)
+    GPIO.output(channel, GPIO.HIGH)
+    GPIO.setup(channel, GPIO.IN)
+    while GPIO.input(channel) == GPIO.LOW:
+        continue
+    while GPIO.input(channel) == GPIO.HIGH:
+        continue
+    j = 0
 
-time.sleep(0.02)
 
-GPIO.output(channel, GPIO.HIGH)
+    data = []
 
-GPIO.setup(channel, GPIO.IN)
+    while j < 40:
 
- 
+        k = 0
 
-while GPIO.input(channel) == GPIO.LOW:
+        while GPIO.input(channel) == GPIO.LOW:
 
-  continue
+            continue
 
-while GPIO.input(channel) == GPIO.HIGH:
+        while GPIO.input(channel) == GPIO.HIGH:
 
-  continue
+            k += 1
 
- 
+            if k > 100:
 
-while j < 40:
+                break
 
-  k = 0
+        if k < 8:
 
-  while GPIO.input(channel) == GPIO.LOW:
+            data.append(0)
 
-    continue
+        else:
 
-  while GPIO.input(channel) == GPIO.HIGH:
+            data.append(1)
 
-    k += 1
+        j += 1
 
-    if k > 100:
+    #print "sensor is working."
 
-      break
+    #print data
 
-  if k < 8:
 
-    data.append(0)
+    humidity_bit = data[0:8]
 
-  else:
+    humidity_point_bit = data[8:16]
 
-    data.append(1)
+    temperature_bit = data[16:24]
 
- 
+    temperature_point_bit = data[24:32]
 
-  j += 1
-
- 
-
-print "sensor is working."
-
-print data
-
- 
-
-humidity_bit = data[0:8]
-
-humidity_point_bit = data[8:16]
-
-temperature_bit = data[16:24]
-
-temperature_point_bit = data[24:32]
-
-check_bit = data[32:40]
+    check_bit = data[32:40]
 
  
 
-humidity = 0
+    humidity = 0
 
-humidity_point = 0
+    humidity_point = 0
 
-temperature = 0
+    temperature = 0
 
-temperature_point = 0
+    temperature_point = 0
 
-check = 0
-
- 
-
-for i in range(8):
-
-  humidity += humidity_bit[i] * 2 ** (7-i)
-
-  humidity_point += humidity_point_bit[i] * 2 ** (7-i)
-
-  temperature += temperature_bit[i] * 2 ** (7-i)
-
-  temperature_point += temperature_point_bit[i] * 2 ** (7-i)
-
-  check += check_bit[i] * 2 ** (7-i)
+    check = 0
 
  
 
-tmp = humidity + humidity_point + temperature + temperature_point
+    for i in range(8):
+
+        humidity += humidity_bit[i] * 2 ** (7-i)
+
+        humidity_point += humidity_point_bit[i] * 2 ** (7-i)
+
+        temperature += temperature_bit[i] * 2 ** (7-i)
+
+        temperature_point += temperature_point_bit[i] * 2 ** (7-i)
+
+        check += check_bit[i] * 2 ** (7-i)
 
  
 
-if check == tmp:
-
-  print "temperature :", temperature, "*C, humidity :", humidity, "%"
-
-else:
-
-  print "wrong"
-
-  print "temperature :", temperature, "*C, humidity :", humidity, "% check :", check, ", tmp :", tmp
+    tmp = humidity + humidity_point + temperature + temperature_point
 
  
 
+    if check == tmp:
+
+        print "温度 :", temperature, "*C, 湿度 :", humidity, "%"
+
+    #else:
+
+       #print "wrong"
+       #print "temperature :", temperature, "*C, humidity :", humidity, "% check :", check, ", tmp :", tmp
+    time.sleep(1.98)
+
+ 
 GPIO.cleanup()
+
 
 
 
